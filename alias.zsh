@@ -1,4 +1,4 @@
-# source ~/.config/utils/.alias
+# source ~/.config/utils/alias.zsh
 alias gdpvpn="cd ~/.config/vpn && bash run.sh"
 alias 4gms="cd ~/Projects/GDP/Microservices"
 alias 4gmf="cd ~/Projects/GDP/Microfronts"
