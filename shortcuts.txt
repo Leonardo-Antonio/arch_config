@@ -1,0 +1,3 @@
+# Abrir rofi con Super + S
+super + s
+    sh ~/.config/rofi/launchers/type-3/launcher.sh
