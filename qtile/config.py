@@ -345,6 +345,41 @@ def init_widgets_list():
             padding=2,
             fontsize=14
         ),
+        widget.TextBox(
+            text='◁',
+            font="Ubuntu Mono",
+            background=colors[0],
+            foreground='fff',
+            padding=2,
+            fontsize=14,
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh prev')}
+        ),
+        widget.TextBox(
+            text='❚❚',
+            font="Ubuntu Mono",
+            background=colors[0],
+            foreground='fff',
+            padding=2,
+            fontsize=14,
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh toggle')}
+        ),
+        widget.TextBox(
+            text='▷',
+            font="Ubuntu Mono",
+            background=colors[0],
+            foreground='fff',
+            padding=2,
+            fontsize=14,
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh next')}
+        ),
+        widget.TextBox(
+            text='|',
+            font="Ubuntu Mono",
+            background=colors[0],
+            foreground='474747',
+            padding=2,
+            fontsize=14
+        ),
         widget.Clock(
             foreground=colors[2],
             background=colors[0],

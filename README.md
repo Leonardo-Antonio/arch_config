@@ -4,7 +4,12 @@
 
 ## Installation and usage
 ```bash
-mkdir ~/.config/testaa -p  && git clone https://github.com/Leonardo-Antonio/arch_config.git ~/.config/testaa && echo "source ~/.config/utils/alias.zsh" >> ~/.zshrc && bash ~/.config/utils/qtile/qtile.sh
+mkdir ~/.config/utils -p  && git clone https://github.com/Leonardo-Antonio/arch_config.git ~/.config/utils && echo "source ~/.config/utils/alias.zsh" >> ~/.zshrc && bash ~/.config/utils/qtile/qtile.sh
+```
+
+## Permissions
+```bash
+sudo chmod +x ~/.config/utils/toggle_audio_spotify.sh ~/.config/utils/share_screen_mobile.sh ~/.config/utils/control_audio_spotify.sh
 ```
 
 ### Example of the configuration:
