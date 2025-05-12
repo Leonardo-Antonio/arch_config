@@ -15,3 +15,4 @@ alias ptag="bash ~/.config/utils/commands/git/lasttag.sh ; bash ~/.config/utils/
 alias ltag="bash ~/.config/utils/commands/git/lasttag.sh"
 alias ctag="bash ~/.config/utils/commands/git/lasttag.sh ; bash ~/.config/utils/commands/git/ctag.sh" 
 alias pcommit="bash ~/.config/utils/commands/git/commit.sh"
+alias share_screen_mobile="bash ~/.config/utils/share_screen_mobile.sh"
