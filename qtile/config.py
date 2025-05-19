@@ -348,28 +348,28 @@ def init_widgets_list():
         widget.TextBox(
             text='◁',
             font="Ubuntu Mono",
-            background=colors[0],
+            background='008f39',
             foreground='fff',
-            padding=2,
-            fontsize=14,
+            padding=3,
+            fontsize=16,
             mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh prev')}
         ),
         widget.TextBox(
             text='❚❚',
             font="Ubuntu Mono",
-            background=colors[0],
+            background='008f39',
             foreground='fff',
-            padding=2,
-            fontsize=14,
+            padding=3,
+            fontsize=16,
             mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh toggle')}
         ),
         widget.TextBox(
             text='▷',
             font="Ubuntu Mono",
-            background=colors[0],
+            background='008f39',
             foreground='fff',
-            padding=2,
-            fontsize=14,
+            padding=3,
+            fontsize=16,
             mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh next')}
         ),
         widget.TextBox(
@@ -381,6 +381,7 @@ def init_widgets_list():
             fontsize=14
         ),
         widget.Clock(
+            fontsize=15,
             foreground=colors[2],
             background=colors[0],
             format="%Y-%m-%d %a %I:%M %p"
@@ -420,8 +421,8 @@ def init_widgets_list():
             fontsize=14
         ),
         widget.CPUGraph(
-            width=50,
-            height=40,
+            width=60,
+            height=50,
             border_color=colors[5],
             fill_color=colors[5],
             graph_color=colors[5],
@@ -436,6 +437,7 @@ def init_widgets_list():
             fontsize=14
         ),
         widget.Battery(
+            fontsize=15,
             foreground=colors[2],
             background=colors[0],
             format="Battery: {char} {percent:2.0%}",
