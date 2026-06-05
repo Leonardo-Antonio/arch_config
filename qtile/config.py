@@ -5,14 +5,14 @@ import re
 import socket
 import subprocess
 from libqtile import qtile
-from libqtile.config import Click, Drag, Group, KeyChord, Key, Match, Screen
+from libqtile.config import (
+    Click, Drag, Group, KeyChord, Key, Match, Screen, ScratchPad, DropDown,
+)
 from libqtile.lazy import lazy  # Corregido aquí
 from libqtile import layout, bar, widget, hook
 from libqtile.utils import guess_terminal
 from typing import List  # noqa: F401
-from libqtile.utils import guess_terminal
 from pathlib import Path
-import subprocess
 
 mod = "mod4"  # Sets mod key to SUPER/WINDOWS
 myTerm = "terminator"
@@ -24,6 +24,17 @@ myBrowser = "qutebrowser"  # My browser of choice
 # p.ej. "JetBrainsMono Nerd Font" / "Iosevka Nerd Font".
 FONT = "CaskaydiaCove Nerd Font Bold"
 FONT_MONO = "CaskaydiaCove Nerd Font Mono"
+FONT_MONO_BOLD = "CaskaydiaCove Nerd Font Mono Bold"
+
+# Verde mas oscuro para el bloque de Spotify (en vez del verde brillante).
+SPOTIFY_GREEN = "#34A146DF"
+
+# Superficies para el estilo "powerline" de la barra (Tokyo Night Storm).
+# Alternamos SURFACE1 (claro) / SURFACE2 (oscuro) entre grupos de widgets.
+SURFACE0 = "#1a1b26"  # base de la barra
+SURFACE1 = "#24283b"  # bloque claro
+SURFACE2 = "#16161e"  # bloque oscuro
+PL_ARROW = ""   # glifo flecha izquierda (Nerd Font powerline)
 
 
 def get_mic_status():
@@ -39,13 +50,75 @@ def get_mic_status():
         return "󰍬 ON"
 
 
+# Ancho visible (en caracteres) de la ventana del titulo de Spotify.
+NP_WIDTH = 20
+# Separador que se ve entre el final y el inicio del texto al dar la vuelta.
+NP_SEP = "   •   "
+# Cada cuantos ticks se vuelve a consultar a playerctl (el scroll avanza en
+# cada tick, pero la metadata solo se refresca cada NP_REFRESH ticks).
+NP_REFRESH = 12
+# Estado persistente del marquee entre llamadas.
+_np = {"meta": "", "status": "", "pos": 0, "tick": 0}
+
+
+def get_now_playing():
+    """Cancion actual de Spotify con efecto marquee (scroll derecha->izq).
+
+    GenPollText llama esta funcion cada `update_interval` segundos; en cada
+    llamada avanzamos un caracter la ventana visible, dando el efecto carrusel.
+    Si el titulo cabe en NP_WIDTH no se desplaza.
+    """
+    try:
+        # Refrescar metadata solo cada NP_REFRESH ticks (playerctl es costoso).
+        if _np["tick"] % NP_REFRESH == 0:
+            status = subprocess.run(
+                ["playerctl", "-p", "spotify", "status"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                timeout=1,
+            ).stdout.strip()
+            if status not in ("Playing", "Paused"):
+                _np.update(meta="", icon="", pos=0, tick=0)
+                return ""
+            meta = subprocess.run(
+                ["playerctl", "-p", "spotify", "metadata", "--format",
+                 "{{artist}} - {{title}}"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                timeout=1,
+            ).stdout.strip()
+            # Si cambia la cancion, reiniciar el scroll desde el inicio.
+            if meta != _np["meta"]:
+                _np["pos"] = 0
+            _np["meta"], _np["status"] = meta, status
+
+        _np["tick"] += 1
+        status, meta = _np["status"], _np["meta"]
+        if not meta:
+            return ""
+        icon = "" if status == "Playing" else "󰖁"
+        # Titulo corto: sin scroll, ancho fijo para que la barra no "salte".
+        if len(meta) <= NP_WIDTH:
+            return f"{icon} {meta.ljust(NP_WIDTH)}"
+        # Titulo largo: ventana deslizante sobre texto+separador, en bucle.
+        full = meta + NP_SEP
+        pos = _np["pos"] % len(full)
+        window = (full + full)[pos:pos + NP_WIDTH]
+        _np["pos"] = pos + 1
+        return f"{icon} {window}"
+    except Exception:
+        return ""
+
+
 mic_status_widget = widget.GenPollText(
     func=get_mic_status,
     update_interval=1,
     font=FONT_MONO,
-    background="#1a1b26",  # Color de fondo del widget
+    background=SURFACE1,  # Color de fondo del widget
     foreground="#c0caf5",  # Color del texto
-    padding=2,
+    padding=6,
     fontsize=14,
 )
 
@@ -103,6 +176,13 @@ keys = [
         desc="Run Launcher",
     ),
     Key([mod], "b", lazy.spawn(myBrowser), desc="Qutebrowser"),
+    # Scratchpad: terminal flotante tipo dropdown (toggle)
+    Key(
+        [mod],
+        "t",
+        lazy.group["scratchpad"].dropdown_toggle("term"),
+        desc="Toggle terminal flotante (scratchpad)",
+    ),
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle through layouts"),
     Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "shift"], "r", lazy.restart(), desc="Restart Qtile"),
@@ -200,6 +280,25 @@ groups = [
     Group("󰭹 CHAT", layout="max"),
 ]
 
+# Scratchpad: terminal flotante que aparece/desaparece con mod+t (tipo Guake).
+groups.append(
+    ScratchPad(
+        "scratchpad",
+        [
+            DropDown(
+                "term",
+                myTerm,
+                width=0.6,
+                height=0.55,
+                x=0.2,
+                y=0.15,
+                opacity=0.95,
+                on_focus_lost_hide=True,
+            ),
+        ],
+    )
+)
+
 # Allow MODKEY+[0 through 9] to bind to groups, see https://docs.qtile.org/en/stable/manual/config/groups.html
 # MOD4 + index Number : Switch to Group[index]
 # MOD4 + shift + index Number : Send active window to another Group
@@ -246,7 +345,7 @@ colors = [
     ["#1a1b26", "#1a1b26"],  # 0 base / fondo barra
     ["#16161e", "#16161e"],  # 1 mas oscuro
     ["#c0caf5", "#c0caf5"],  # 2 texto
-    ["#f7768e", "#f7768e"],  # 3 rojo
+    ["#a30c28", "#a30c28"],  # 3 rojo
     ["#9ece6a", "#9ece6a"],  # 4 verde
     ["#ff9e64", "#ff9e64"],  # 5 naranja
     ["#7aa2f7", "#7aa2f7"],  # 6 azul
@@ -262,18 +361,43 @@ widget_defaults = dict(font=FONT, fontsize=10, padding=2, background=colors[2])
 extension_defaults = widget_defaults.copy()
 
 
+def powerline(fg, bg):
+    """Transicion 'powerline': flecha cuyo color (fg) es el bloque de la
+    DERECHA y el fondo (bg) es el bloque de la IZQUIERDA."""
+    return widget.TextBox(
+        text=PL_ARROW,
+        font=FONT_MONO,
+        fontsize=33,
+        padding=0,
+        foreground=fg,
+        background=bg,
+    )
+
+
+def spot_btn(icon, action, bg):
+    return widget.TextBox(
+        text=icon,
+        font=FONT_MONO_BOLD,
+        background=bg,
+        foreground="#1a1b26",
+        padding=5,
+        fontsize=20,
+        mouse_callbacks={
+            "Button1": lambda: qtile.spawn(
+                f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh {action}'
+            )
+        },
+    )
+
+
 def init_widgets_list():
+    spotify_bg = SPOTIFY_GREEN  # verde mas oscuro para el bloque de Spotify
     widgets_list = [
-        widget.Sep(linewidth=0, padding=6, foreground=colors[2], background=colors[0]),
-        # widget.Image(
-        #     filename="~/.config/qtile/icons/arch.png",
-        #     scale="False",
-        #     mouse_callbacks={'Button1': lambda: qtile.spawn(myTerm)}
-        # ),
-        widget.Sep(linewidth=0, padding=6, foreground=colors[2], background=colors[0]),
+        # ---------- IZQUIERDA (plano sobre la base) ----------
+        widget.Sep(linewidth=0, padding=6, background=SURFACE0),
         widget.GroupBox(
             font=FONT,
-            fontsize=11,
+            fontsize=10,
             margin_y=3,
             margin_x=0,
             padding_y=3,
@@ -289,200 +413,132 @@ def init_widgets_list():
             other_current_screen_border=colors[6],
             other_screen_border=colors[4],
             foreground=colors[2],
-            background=colors[0],
-        ),
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
+            background=SURFACE0,
         ),
         widget.CurrentLayout(
             mode="icon",
             custom_icon_paths=[os.path.expanduser("~/.config/qtile/icons")],
             foreground=colors[2],
-            background=colors[0],
-            padding=0,
+            background=SURFACE0,
+            padding=4,
             scale=0.7,
         ),
         widget.CurrentLayout(
-            mode="text", foreground=colors[2], background=colors[0], padding=5,
-        ),
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
+            mode="text", foreground=colors[2], background=SURFACE0, padding=5,
         ),
         widget.WindowName(
-            foreground=colors[2], background=colors[0], padding=5, fontsize=13, font=FONT
+            foreground=colors[2], background=SURFACE0, padding=5,
+            fontsize=13, font=FONT, max_chars=60,
         ),
-        mic_status_widget,
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
-        widget.TextBox(
-            text="󰒮",
-            font=FONT_MONO,
-            background="#9ece6a",
+
+        # ---------- BLOQUE: SPOTIFY (verde) ----------
+        powerline(spotify_bg, SURFACE0),
+        spot_btn("󰒮", "prev", spotify_bg),
+        spot_btn("󰐎", "toggle", spotify_bg),
+        spot_btn("󰒭", "next", spotify_bg),
+        widget.GenPollText(
+            func=get_now_playing,
+            update_interval=0.3,  # ritmo del scroll del marquee (mas bajo = mas fluido)
+            font=FONT_MONO_BOLD,
+            background=spotify_bg,
             foreground="#1a1b26",
-            padding=6,
-            fontsize=18,
-            mouse_callbacks={
-                "Button1": lambda: qtile.spawn(
-                    f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh prev'
-                )
-            },
-        ),
-        widget.TextBox(
-            text="󰐎",
-            font=FONT_MONO,
-            background="#9ece6a",
-            foreground="#1a1b26",
-            padding=6,
-            fontsize=18,
+            padding=3,
+            fontsize=16,
             mouse_callbacks={
                 "Button1": lambda: qtile.spawn(
                     f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh toggle'
                 )
             },
         ),
+
+        # ---------- BLOQUE: SISTEMA (CPU temp + grafica + RAM) ----------
+        powerline(SURFACE2, spotify_bg),
         widget.TextBox(
-            text="󰒭",
-            font=FONT_MONO,
-            background="#9ece6a",
-            foreground="#1a1b26",
-            padding=6,
-            fontsize=18,
-            mouse_callbacks={
-                "Button1": lambda: qtile.spawn(
-                    f'{os.getenv("HOME")}/.config/utils/control_audio_spotify.sh next'
-                )
-            },
+            text="󰔏", font=FONT_MONO, foreground=colors[5],
+            background=SURFACE2, padding=4, fontsize=16,
         ),
-        widget.TextBox(
-            text="|",
+        widget.ThermalSensor(
             font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
-        widget.Clock(
-            fontsize=15,
-            foreground=colors[2],
-            background=colors[0],
-            format="󰥔 %Y-%m-%d %a %I:%M %p",
+            foreground=colors[5], background=SURFACE2, fontsize=14,
+            format="{temp:>2.0f}{unit}", update_interval=5,
+            threshold=80, foreground_alert=colors[3],
         ),
         widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
-        widget.Systray(background=colors[0], icon_size=20),
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
-        widget.Memory(
-            foreground=colors[2],
-            background=colors[0],
-            fontsize=14,
-            fmt="󰍛 {}",
-            mouse_callbacks={"Button1": lambda: qtile.spawn(myTerm + " -e htop")},
-        ),
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
-        widget.TextBox(
-            text="󰻠",
-            font=FONT_MONO,
-            foreground=colors[5],
-            background=colors[0],
-            padding=2,
-            fontsize=16,
+            text="󰻠", font=FONT_MONO, foreground=colors[5],
+            background=SURFACE2, padding=2, fontsize=16,
         ),
         widget.CPUGraph(
-            width=60,
-            height=50,
-            border_color=colors[5],
-            fill_color=colors[5],
-            graph_color=colors[5],
-            background=colors[0],
+            width=55, height=24, line_width=1,
+            border_color=SURFACE2, fill_color=colors[5],
+            graph_color=colors[5], background=SURFACE2, margin_y=5,
         ),
-        widget.TextBox(
-            text="|",
+        widget.Memory(
             font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
+            foreground=colors[2], background=SURFACE2, fontsize=14,
+            fmt="󰍛 {}", format="{MemUsed:>5.0f}{mm}",
+            mouse_callbacks={"Button1": lambda: qtile.spawn(myTerm + " -e htop")},
         ),
-        widget.Battery(
-            fontsize=15,
-            foreground=colors[2],
-            background=colors[0],
-            format="󰁹 {percent:2.0%}",
-            update_interval=10,
-            low_percentage=0.2,
-        ),
-        widget.TextBox(
-            text="|",
-            font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
-        ),
+
+        # ---------- BLOQUE: RED (ancho fijo -> no salta) ----------
+        # widget.Net(
+        #     font=FONT_MONO,
+        #     foreground=colors[8], background=SURFACE1, fontsize=13,
+        #     format="󰇚 {down:>5}{down_suffix}  {up:>5}{up_suffix} 󰕒",
+        # ),
+
+        # ---------- BLOQUE: ACTUALIZACIONES ----------
+        # powerline(SURFACE2, SURFACE1),
+        # widget.CheckUpdates(
+        #     font=FONT_MONO,
+        #     distro="Arch",
+        #     display_format="󰚰 {updates}",
+        #     no_update_string="󰄬 0",
+        #     update_interval=1800,
+        #     colour_have_updates=colors[5],
+        #     colour_no_updates=colors[4],
+        #     background=SURFACE2,
+        #     fontsize=14,
+        #     mouse_callbacks={
+        #         "Button1": lambda: qtile.spawn(myTerm + " -e yay -Syu")
+        #     },
+        # ),
+
+        # ---------- BLOQUE: AUDIO (volumen + microfono) ----------
+        powerline(SURFACE1, SURFACE2),
         widget.Volume(
-            foreground=colors[2],
-            background=colors[0],
-            fontsize=14,
-            fmt="󰕾 {}",
+            font=FONT_MONO,
+            foreground=colors[8], background=SURFACE1, fontsize=14,
+            fmt="󰕾 {:>4}",
             mouse_callbacks={"Button1": lambda: qtile.spawn("pavucontrol")},
         ),
-        # widget.Network(
-        #     foreground=colors[2],
-        #     background=colors[0],
-        #     format="Net: {down} ↓↑ {up}",
-        #     interface="wlp2s0"
-        # ),
-        widget.TextBox(
-            text="|",
+        mic_status_widget,
+
+        # ---------- BLOQUE: BATERIA ----------
+        powerline(SURFACE2, SURFACE1),
+        widget.Battery(
             font=FONT_MONO,
-            background=colors[0],
-            foreground="#414868",
-            padding=2,
-            fontsize=14,
+            fontsize=14, foreground=colors[4], background=SURFACE2,
+            format="{char} {percent:>4.0%}",
+            charge_char="󰂄", discharge_char="󰁹", full_char="󰁹",
+            empty_char="󰂎", unknown_char="󰁹",
+            update_interval=10, low_percentage=0.2, low_foreground=colors[3],
         ),
-        widget.TextBox(
-            text="⏻",
+
+        # ---------- BLOQUE: RELOJ ----------
+        powerline(SURFACE1, SURFACE2),
+        widget.Clock(
             font=FONT_MONO,
-            foreground=colors[3],
-            background=colors[0],
-            padding=6,
-            fontsize=18,
+            fontsize=14, foreground=colors[2], background=SURFACE1,
+            format="󰥔 %a %d %b  %I:%M %p",
+        ),
+
+        # ---------- BANDEJA + APAGADO ----------
+        powerline(SURFACE2, SURFACE1),
+        widget.Systray(background=SURFACE2, icon_size=18, padding=6),
+        powerline(colors[3][0], SURFACE2),
+        widget.TextBox(
+            text="⏻", font=FONT, foreground="#fcfcff", 
+            background=colors[3], padding=8, fontsize=12,
             mouse_callbacks={
                 "Button1": lambda: qtile.spawn(
                     f'{os.getenv("HOME")}/.config/utils/powermenu_qtile.sh'
@@ -524,4 +580,4 @@ def autostart():
     subprocess.Popen(["feh", "--bg-fill", os.path.expanduser("~/.config/utils/wallpapers/clasic.jpg")])
     subprocess.Popen(["xbindkeys"])
     subprocess.Popen(['picom', '--backend', 'glx', '--experimental-backends'])
-    subprocess.Popen(["nm-applet &"])
+    subprocess.Popen(["nm-applet"])
