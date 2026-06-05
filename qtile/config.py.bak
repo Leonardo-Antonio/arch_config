@@ -34,9 +34,9 @@ def get_mic_status():
         text=True,
     )
     if "[off]" in result.stdout:
-        return "󰍭 OFF"
+        return "🎤 OFF"
     else:
-        return "󰍬 ON"
+        return "🎤 ON"
 
 
 mic_status_widget = widget.GenPollText(
@@ -190,14 +190,14 @@ keys = [
 ]
 
 groups = [
-    Group("󰧑 IA", layout="max"),
-    Group("󰒍 BACK", layout="max"),
-    Group("󰖟 FRONT", layout="max"),
-    Group("󰈹 WEB", layout="max"),
-    Group("󰙨 TEST", layout="max"),
-    Group("󰆼 DB", layout="max"),
-    Group("󰈙 DOC", layout="max"),
-    Group("󰭹 CHAT", layout="max"),
+    Group("[1] IA", layout="max"),
+    Group("[2] BACK", layout="max"),
+    Group("[3] FRONT", layout="max"),
+    Group("[4] WEB", layout="max"),
+    Group("[5] TEST", layout="max"),
+    Group("[6] DB", layout="max"),
+    Group("[7] DOC", layout="max"),
+    Group("[9] CHAT", layout="max"),
 ]
 
 # Allow MODKEY+[0 through 9] to bind to groups, see https://docs.qtile.org/en/stable/manual/config/groups.html
@@ -299,16 +299,13 @@ def init_widgets_list():
             fontsize=14,
         ),
         widget.CurrentLayout(
-            mode="icon",
             custom_icon_paths=[os.path.expanduser("~/.config/qtile/icons")],
             foreground=colors[2],
             background=colors[0],
             padding=0,
             scale=0.7,
         ),
-        widget.CurrentLayout(
-            mode="text", foreground=colors[2], background=colors[0], padding=5
-        ),
+        widget.CurrentLayout(foreground=colors[2], background=colors[0], padding=5),
         widget.TextBox(
             text="|",
             font=FONT_MONO,
@@ -380,7 +377,7 @@ def init_widgets_list():
             fontsize=15,
             foreground=colors[2],
             background=colors[0],
-            format="󰥔 %Y-%m-%d %a %I:%M %p",
+            format="%Y-%m-%d %a %I:%M %p",
         ),
         widget.TextBox(
             text="|",
@@ -403,7 +400,7 @@ def init_widgets_list():
             foreground=colors[2],
             background=colors[0],
             fontsize=14,
-            fmt="󰍛 {}",
+            fmt="Mem: {}",
             mouse_callbacks={"Button1": lambda: qtile.spawn(myTerm + " -e htop")},
         ),
         widget.TextBox(
@@ -413,14 +410,6 @@ def init_widgets_list():
             foreground="474747",
             padding=2,
             fontsize=14,
-        ),
-        widget.TextBox(
-            text="󰻠",
-            font=FONT_MONO,
-            foreground=colors[5],
-            background=colors[0],
-            padding=2,
-            fontsize=16,
         ),
         widget.CPUGraph(
             width=60,
@@ -442,7 +431,7 @@ def init_widgets_list():
             fontsize=15,
             foreground=colors[2],
             background=colors[0],
-            format="󰁹 {percent:2.0%}",
+            format="Battery: {percent:2.0%}",
             update_interval=10,
             low_percentage=0.2,
         ),
@@ -458,8 +447,16 @@ def init_widgets_list():
             foreground=colors[2],
             background=colors[0],
             fontsize=14,
-            fmt="󰕾 {}",
+            fmt="Vol: {}",
             mouse_callbacks={"Button1": lambda: qtile.spawn("pavucontrol")},
+        ),
+        widget.TextBox(
+            text="|",
+            font=FONT_MONO,
+            background=colors[0],
+            foreground="474747",
+            padding=2,
+            fontsize=14,
         ),
         # widget.Network(
         #     foreground=colors[2],
