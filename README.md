@@ -4,6 +4,18 @@ Este repositorio contiene una configuracion de Qtile, alias para Zsh, atajos y s
 
 La guia asume un entorno limpio en Arch Linux. Si ya tienes parte de estas herramientas instaladas, `pacman` simplemente las omitira o las actualizara.
 
+
+## Capturas
+
+### Escritorio
+
+![Escritorio](./docs/desktop.png)
+
+### Entorno de trabajo
+
+![Entorno de trabajo](./docs/work.png)
+
+
 ## Contenido del repositorio
 
 - `qtile/config.py`: configuracion principal de Qtile.
@@ -243,12 +255,3 @@ Si todo esta bien, `python -m py_compile` no imprimira errores.
 - `share_screen_mobile.sh` no detecta el telefono: activa depuracion USB, acepta la huella RSA en Android y revisa el vendor id con `lsusb`.
 - `powermenu_qtile.sh` no bloquea: instala `i3lock` o `betterlockscreen`; si no existen, usa `loginctl lock-session`.
 
-## Capturas
-
-### Escritorio
-
-![Escritorio](./docs/desktop.png)
-
-### Entorno de trabajo
-
-![Entorno de trabajo](./docs/work.png)
