@@ -243,6 +243,12 @@ Si todo esta bien, `python -m py_compile` no imprimira errores.
 - `share_screen_mobile.sh` no detecta el telefono: activa depuracion USB, acepta la huella RSA en Android y revisa el vendor id con `lsusb`.
 - `powermenu_qtile.sh` no bloquea: instala `i3lock` o `betterlockscreen`; si no existen, usa `loginctl lock-session`.
 
-## Captura
+## Capturas
 
-![qtile](./image.png)
+### Escritorio
+
+![Escritorio](./docs/desktop.png)
+
+### Entorno de trabajo
+
+![Entorno de trabajo](./docs/work.png)

@@ -43,8 +43,8 @@ mic_status_widget = widget.GenPollText(
     func=get_mic_status,
     update_interval=1,
     font=FONT_MONO,
-    background="#282828",  # Color de fondo del widget
-    foreground="fff",  # Color del texto (blanco)
+    background="#1a1b26",  # Color de fondo del widget
+    foreground="#c0caf5",  # Color del texto
     padding=2,
     fontsize=14,
 )
@@ -207,9 +207,9 @@ dgroups_key_binder = simple_key_binder("mod4")
 
 layout_theme = {
     "border_width": 2,
-    "margin": 4,
-    "border_focus": "e1acff",
-    "border_normal": "1D2330",
+    "margin": 3,
+    "border_focus": "7aa2f7",
+    "border_normal": "16161e",
 }
 
 layouts = [
@@ -241,17 +241,18 @@ layouts = [
     # layout.Floating(**layout_theme)
 ]
 
+# Tokyo Night
 colors = [
-    ["#282c34", "#282c34"],
-    ["#1c1f24", "#1c1f24"],
-    ["#dfdfdf", "#dfdfdf"],
-    ["#ff6c6b", "#ff6c6b"],
-    ["#98be65", "#98be65"],
-    ["#da8548", "#da8548"],
-    ["#51afef", "#51afef"],
-    ["#c678dd", "#c678dd"],
-    ["#46d9ff", "#46d9ff"],
-    ["#a9a1e1", "#a9a1e1"],
+    ["#1a1b26", "#1a1b26"],  # 0 base / fondo barra
+    ["#16161e", "#16161e"],  # 1 mas oscuro
+    ["#c0caf5", "#c0caf5"],  # 2 texto
+    ["#f7768e", "#f7768e"],  # 3 rojo
+    ["#9ece6a", "#9ece6a"],  # 4 verde
+    ["#ff9e64", "#ff9e64"],  # 5 naranja
+    ["#7aa2f7", "#7aa2f7"],  # 6 azul
+    ["#bb9af7", "#bb9af7"],  # 7 magenta
+    ["#7dcfff", "#7dcfff"],  # 8 cyan
+    ["#9d7cd8", "#9d7cd8"],  # 9 purpura
 ]
 
 prompt = "{0}@{1}: ".format(os.environ["USER"], socket.gethostname())
@@ -294,7 +295,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -307,33 +308,33 @@ def init_widgets_list():
             scale=0.7,
         ),
         widget.CurrentLayout(
-            mode="text", foreground=colors[2], background=colors[0], padding=5
+            mode="text", foreground=colors[2], background=colors[0], padding=5,
         ),
         widget.TextBox(
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
         widget.WindowName(
-            foreground=colors[2], background=colors[0], padding=5, fontsize=12
+            foreground=colors[2], background=colors[0], padding=5, fontsize=13, font=FONT
         ),
         mic_status_widget,
         widget.TextBox(
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
         widget.TextBox(
             text="󰒮",
             font=FONT_MONO,
-            background="008f39",
-            foreground="fff",
+            background="#9ece6a",
+            foreground="#1a1b26",
             padding=6,
             fontsize=18,
             mouse_callbacks={
@@ -345,8 +346,8 @@ def init_widgets_list():
         widget.TextBox(
             text="󰐎",
             font=FONT_MONO,
-            background="008f39",
-            foreground="fff",
+            background="#9ece6a",
+            foreground="#1a1b26",
             padding=6,
             fontsize=18,
             mouse_callbacks={
@@ -358,8 +359,8 @@ def init_widgets_list():
         widget.TextBox(
             text="󰒭",
             font=FONT_MONO,
-            background="008f39",
-            foreground="fff",
+            background="#9ece6a",
+            foreground="#1a1b26",
             padding=6,
             fontsize=18,
             mouse_callbacks={
@@ -372,7 +373,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -386,7 +387,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -395,7 +396,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -410,7 +411,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -434,7 +435,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -450,7 +451,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -471,7 +472,7 @@ def init_widgets_list():
             text="|",
             font=FONT_MONO,
             background=colors[0],
-            foreground="474747",
+            foreground="#414868",
             padding=2,
             fontsize=14,
         ),
@@ -494,7 +495,12 @@ def init_widgets_list():
 
 screens = [
     Screen(
-        top=bar.Bar(init_widgets_list(), 24, background=colors[0]),
+        top=bar.Bar(
+            init_widgets_list(),
+            34,
+            background=colors[0],
+            margin=[3, 3, 1, 3],  # [arriba, derecha, abajo, izquierda]
+        ),
     ),
 ]
 
@@ -515,6 +521,7 @@ mouse = [
 
 @hook.subscribe.startup_once
 def autostart():
+    subprocess.Popen(["feh", "--bg-fill", os.path.expanduser("~/.config/utils/wallpapers/clasic.jpg")])
     subprocess.Popen(["xbindkeys"])
     subprocess.Popen(['picom', '--backend', 'glx', '--experimental-backends'])
     subprocess.Popen(["nm-applet &"])
