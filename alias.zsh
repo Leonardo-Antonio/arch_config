@@ -1,4 +1,5 @@
 # source ~/.config/utils/alias.zsh
+alias gdpversion="SHEET_ID=1KGdgndLSTuwgacey3oFuz_NmkjtrwpKQHWQAmrqN7xs SHEET_GID=2136901219 /home/leonardo/Projects/gdpversions/gdpversion "
 alias gdpvpn="cd ~/.config/vpn && bash run.sh"
 alias 4gms="cd ~/Projects/GDP/Microservices"
 alias 4gmf="cd ~/Projects/GDP/Microfronts"
@@ -17,4 +18,6 @@ alias ltag="bash ~/.config/utils/commands/git/lasttag.sh"
 alias ctag="bash ~/.config/utils/commands/git/lasttag.sh ; bash ~/.config/utils/commands/git/ctag.sh" 
 alias pcommit="bash ~/.config/utils/commands/git/commit.sh"
 alias share_screen_mobile="bash ~/.config/utils/share_screen_mobile.sh"
-alias codex="code . && exit"
+alias chat="setsid /opt/discord/Discord >/dev/null 2>&1 &"
+alias checkupdate="cd ~/Projects/checkupdate && bash discord.bash"
+alias pb="~/pocketbase/pocketbase"
